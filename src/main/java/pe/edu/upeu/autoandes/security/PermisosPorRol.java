@@ -1,61 +1,57 @@
 package pe.edu.upeu.autoandes.security;
 
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import pe.edu.upeu.autoandes.entity.Rol;
 import pe.edu.upeu.autoandes.enums.Permiso;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.EnumSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 public final class PermisosPorRol {
 
-    private PermisosPorRol() {
-    }
-
-    private static final Map<String, Set<Permiso>> ROLE_PERMISSIONS = Map.of(
-            "ADMIN", EnumSet.of(
-                    Permiso.SERVICIO_LEER,
-                    Permiso.SERVICIO_ESCRIBIR,
-                    Permiso.VEHICULO_LEER,
-                    Permiso.VEHICULO_ESCRIBIR,
-                    Permiso.ORDEN_LEER,
-                    Permiso.ORDEN_REGISTRAR,
-                    Permiso.ORDEN_ANULAR,
-                    Permiso.REPORTE_VER
-            ),
-            "ASESOR", EnumSet.of(
+    private static final Map<String, Set<Permiso>> PERMISOS = Map.of(
+            "ADMIN", Collections.unmodifiableSet(EnumSet.allOf(Permiso.class)),
+            "ASESOR", Collections.unmodifiableSet(EnumSet.of(
                     Permiso.SERVICIO_LEER,
                     Permiso.VEHICULO_LEER,
                     Permiso.VEHICULO_ESCRIBIR,
                     Permiso.ORDEN_LEER,
-                    Permiso.ORDEN_REGISTRAR
-            ),
-            "JEFE_TALLER", EnumSet.of(
+                    Permiso.ORDEN_REGISTRAR)),
+            "JEFE_TALLER", Collections.unmodifiableSet(EnumSet.of(
                     Permiso.SERVICIO_LEER,
                     Permiso.SERVICIO_ESCRIBIR,
                     Permiso.VEHICULO_LEER,
                     Permiso.ORDEN_LEER,
                     Permiso.ORDEN_ANULAR,
-                    Permiso.REPORTE_VER
-            )
+                    Permiso.REPORTE_VER))
     );
 
-    public static Set<Permiso> getPermisosPorRol(String rolNombre) {
-        if (rolNombre == null) {
-            return Collections.emptySet();
-        }
-        return ROLE_PERMISSIONS.getOrDefault(rolNombre.toUpperCase(), Collections.emptySet());
+    private PermisosPorRol() {}
+
+    public static Set<Permiso> de(String nombreRol) {
+        return PERMISOS.getOrDefault(nombreRol, Set.of());
     }
 
     public static Set<Permiso> getPermisosPorRoles(Collection<String> roles) {
-        if (roles == null || roles.isEmpty()) {
-            return Collections.emptySet();
+        Set<Permiso> permisos = new HashSet<>();
+        if (roles != null) {
+            for (String rol : roles) {
+                permisos.addAll(de(rol));
+            }
         }
-        Set<Permiso> unionPermisos = EnumSet.noneOf(Permiso.class);
-        for (String rol : roles) {
-            unionPermisos.addAll(getPermisosPorRol(rol));
+        return permisos;
+    }
+
+    public static List<GrantedAuthority> authorities(Collection<Rol> roles) {
+        List<GrantedAuthority> authorities = new ArrayList<>();
+        if (roles == null) return authorities;
+
+        for (Rol rol : roles) {
+            authorities.add(new SimpleGrantedAuthority("ROLE_" + rol.getNombre()));
+            for (Permiso p : de(rol.getNombre())) {
+                authorities.add(new SimpleGrantedAuthority(p.name()));
+            }
         }
-        return unionPermisos;
+        return authorities;
     }
 }
