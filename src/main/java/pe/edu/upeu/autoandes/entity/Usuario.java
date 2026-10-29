@@ -15,13 +15,13 @@ public class Usuario {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "username", nullable = false, unique = true, length = 30)
+    @Column(name = "username", nullable = false, unique = true, length = 50)
     private String username;
 
     @Column(name = "password", nullable = false, length = 100)
     private String password;
 
-    @Column(name = "nombrecompleto", nullable = false, length = 120)
+    @Column(name = "nombre_completo", nullable = false, length = 120)
     private String nombreCompleto;
 
     @Column(name = "activo", nullable = false)
@@ -29,9 +29,9 @@ public class Usuario {
 
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
-            name = "usuarioroles",
-            joinColumns = @JoinColumn(name = "usuarioid"),
-            inverseJoinColumns = @JoinColumn(name = "rolid")
+            name = "usuario_roles",
+            joinColumns = @JoinColumn(name = "usuario_id"),
+            inverseJoinColumns = @JoinColumn(name = "rol_id")
     )
     private Set<Rol> roles = new HashSet<>();
 }
