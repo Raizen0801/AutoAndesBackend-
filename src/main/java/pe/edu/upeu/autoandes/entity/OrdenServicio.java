@@ -1,37 +1,17 @@
 package pe.edu.upeu.autoandes.entity;
 
-import jakarta.persistence.CascadeType;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToMany;
-import jakarta.persistence.Table;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-import pe.edu.upeu.autoandes.enums.EstadoOrden;
-
-import java.math.BigDecimal;
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
+import jakarta.persistence.*;
+import lombok.*;
+import pe.edu.upeu.autoandes.enums.*;
+import java.math.*;
+import java.time.*;
+import java.util.*;
 
 @Entity
 @Table(name = "orden_servicio")
-@Getter
-@Setter
+@Data
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
 public class OrdenServicio {
 
     @Id
@@ -65,16 +45,22 @@ public class OrdenServicio {
     private String motivoAnulacion;
 
     @OneToMany(mappedBy = "ordenServicio", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
-    @Builder.Default
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
     private List<DetalleOrden> detalles = new ArrayList<>();
 
     public void addDetalle(DetalleOrden detalle) {
-        detalles.add(detalle);
+        if (this.detalles == null) {
+            this.detalles = new ArrayList<>();
+        }
+        this.detalles.add(detalle);
         detalle.setOrdenServicio(this);
     }
 
     public void removeDetalle(DetalleOrden detalle) {
-        detalles.remove(detalle);
+        if (this.detalles != null) {
+            this.detalles.remove(detalle);
+        }
         detalle.setOrdenServicio(null);
     }
 }
